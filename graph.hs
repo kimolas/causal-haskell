@@ -1,5 +1,5 @@
--- Graphical Models in Haskell. 
--- (Also works for networks)
+-- (Kinda) Graphical Models in Haskell. 
+-- (Also works for networks, sort of)
 -- Nicolas Kim
 -- Department of Statistics, Carnegie Mellon University 
 -- 26 March 2015
