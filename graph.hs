@@ -31,8 +31,8 @@ makeValid gr@(Graph ns es)
 
 -- Add a set of nodes to a graph using their labels. 
 addNodes :: Graph -> [Int] -> Graph
-addNodes (Graph [ns] [es]) [nns] = (Graph (List.union [ns] [nns]) [es])
+addNodes (Graph ns es) nns = (Graph (List.union ns nns) es)
 
 -- Add a set of edges to a graph. 
 addEdges :: Graph -> [(Int, Int)] -> Graph
-addEdges (Graph [ns] [es]) [ees] = (Graph [ns] (List.union [es] [ees]))
+addEdges (Graph ns es) ees = (Graph ns (List.union es ees))
