@@ -11,10 +11,10 @@ import qualified Data.List as List
 -- let gr2 = Graph [1..2] [(1,2), (2,1), (1,3)]
 
 data Graph = Graph { nodes :: [Int]
-                   , edges :: [(Int, Int)]
-                   } deriving (Show, Eq)
+                      , edges :: [(Int, Int)]
+                      } deriving (Show, Eq)
 
-data Model = Model { statistics :: [Float] } deriving (Show, Eq)
+data Model = ERG { statistics :: [Float] } deriving (Show, Eq)
 
 -- Checks if the edges contain defined nodes. 
 validGraph :: Graph -> Bool
@@ -40,6 +40,6 @@ addEdges (Graph ns es) ees = (Graph ns (List.union es ees))
 
 -- Model fitting. 
 fitERG :: Graph -> Model
-fitERG gr@(Graph ns es) = Model [ density ]
+fitERG gr@(Graph ns es) = ERG [ density ]
   where
-    density = (/) (fromInteger $ length es)(fromInteger $ length ns)
+    density = (/) (fromIntegral $ length es) (fromIntegral $ length ns)
