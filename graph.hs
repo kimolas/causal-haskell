@@ -10,10 +10,11 @@ import qualified Data.List as List
 -- let gr1 = Graph [1..3] [(1,2), (2,1), (1,3)]
 -- let gr2 = Graph [1..2] [(1,2), (2,1), (1,3)]
 
--- Todo: turn this into key-value pair structure for faster lookup. 
 data Graph = Graph { nodes :: [Int]
-                    , edges :: [(Int, Int)]
-                    } deriving (Show, Eq)
+                   , edges :: [(Int, Int)]
+                   } deriving (Show, Eq)
+
+data Model = Model { statistics :: [Float] } deriving (Show, Eq)
 
 -- Checks if the edges contain defined nodes. 
 validGraph :: Graph -> Bool
@@ -36,3 +37,9 @@ addNodes (Graph ns es) nns = (Graph (List.union ns nns) es)
 -- Add a set of edges to a graph. 
 addEdges :: Graph -> [(Int, Int)] -> Graph
 addEdges (Graph ns es) ees = (Graph ns (List.union es ees))
+
+-- Model fitting. 
+fitERG :: Graph -> Model
+fitERG gr@(Graph ns es) = Model [ density ]
+  where
+    density = (/) (fromInteger $ length es)(fromInteger $ length ns)
