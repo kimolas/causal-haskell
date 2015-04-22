@@ -8,7 +8,7 @@ import qualified Data.List as L
 -- Some examples of graphs. 
 gr1 = Graph [1..3] [(1,2), (2,1), (1,3)]
 gr2 = Graph [1..2] [(1,2), (2,1), (1,3)]
-gr3 = Graph [1..10] 
+gr3 = completeGraph [1..10] 
 
 
 data Graph = Graph { nodes :: [Int]
@@ -23,11 +23,11 @@ data Model = ERG { parameters :: [Double] } deriving (Show, Eq)
 emptyGraph :: Graph
 emptyGraph = Graph [] []
 
--- Makes a complete graph from a list of nodes. 
+-- Makes a complete simple graph from a list of nodes. 
 completeGraph :: [Int] -> Graph
 completeGraph ns = Graph ns (redundant es)
   where
-    es = [ (x, y) | x <- ns, y <- ns ]
+    es = [ (x, y) | x <- ns, y <- ns , x /= y]
 
 -- Makes a valid graph object from a list of edges. 
 toGraph :: [(Int, Int)] -> Graph
@@ -69,6 +69,15 @@ addEdges (Graph ns es) ees = Graph ns (L.union es ees)
 
 
 -- Various graph statistics. 
+-- Computes the number of nodes. 
+nNode :: Graph -> Int
+nNode gr = length $ nodes gr
+
+-- Computes the number of edges. 
+nEdge :: Graph -> Int
+nEdge gr = length $ edges gr
+
+
 -- Computes the graph density. 
 density :: Graph -> Statistic
 density gr@(Graph ns es) = Statistic [ dense ]
