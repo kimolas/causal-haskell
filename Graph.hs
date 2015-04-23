@@ -1,7 +1,9 @@
 -- Graphical and Network Models in Haskell. 
 -- Nicolas Kim
 -- Department of Statistics, Carnegie Mellon University 
+-- Distributed under the MIT License. 
 
+import System.IO
 import qualified Data.Map as M
 import qualified Data.List as L
 import qualified Numeric.LinearAlgebra as LA
@@ -75,7 +77,7 @@ addEdges (Graph ns es) ees = Graph ns (L.union es ees)
 -- adjacency (Graph ns es) = (n >< n) . (\x -> )
 --   where
 --     n = length ns
---     x = [  | x <- 
+--     x = [  | x <-  ]
 
 ---- Various graph statistics. 
 -- Computes the number of nodes. 
@@ -90,8 +92,18 @@ nEdge gr = length $ edges gr
 -- nTriangle :: Graph -> Int
 
 
--- Just a toy example; doesn't mean anything. 
+-- Just a toy calculation; doesn't mean anything. 
 density :: Graph a -> Statistic
 density gr@(Graph ns es) = Statistic [ dense ]
   where
     dense = (/) (fromIntegral $ length es) (fromIntegral $ length ns)
+
+-- IO helper. 
+-- readInt :: IO Int
+-- readInt = readLn
+
+-- Diagnostics. 
+-- main :: IO ()
+-- main = do
+--     n <- readInt
+--     putStr . (\x -> "\nNumber of edges: "++x++"\n") . show . length . edges $ completeGraph [1..n]
