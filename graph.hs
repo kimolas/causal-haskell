@@ -90,7 +90,7 @@ nEdge gr = length $ edges gr
 -- nTriangle :: Graph -> Int
 
 
--- Computes the graph density. 
+-- Just a toy example; doesn't mean anything. 
 density :: Graph a -> Statistic
 density gr@(Graph ns es) = Statistic [ dense ]
   where
