@@ -14,13 +14,15 @@ gr1 = Graph [1..3] [(1,2), (2,1), (1,3)]
 gr2 = Graph [1..2] [(1,2), (2,1), (1,3)]
 gr3 = completeGraph [1..10] 
 
-
+-- Data structure for graphs and networks. 
 data Graph a = Graph { nodes :: [a]
                      , edges :: [(a, a)]
                      } deriving (Show, Eq)
 
-data Statistic = Statistic { values :: [Double] } deriving (Show, Eq)
+-- -- Data structure for calculated statistics. 
+-- data Statistic a = Statistic { values :: a } deriving (Show, Eq)
 
+-- Data structure for network models. 
 data Model = ERG { parameters :: [Double] } deriving (Show, Eq)
 
 -- Makes an empty graph. 
@@ -32,7 +34,7 @@ completeGraph :: (Ord a, Eq a) => [a] -> Graph a
 completeGraph ns = Graph sns (redundant es)
   where
     sns = L.sort ns
-    es = [ (x, y) | x <- sns, y <- sns , x /= y]
+    es = [ (x, y) | x <- sns, y <- sns , x /= y ]
 
 -- Makes a valid graph object from a list of edges. 
 toGraph :: (Ord a, Eq a) => [(a, a)] -> Graph a
@@ -92,12 +94,6 @@ nEdge gr = length $ edges gr
 -- nTriangle :: Graph -> Int
 
 
--- Just a toy calculation; doesn't mean anything. 
-density :: Graph a -> Statistic
-density gr@(Graph ns es) = Statistic [ dense ]
-  where
-    dense = (/) (fromIntegral $ length es) (fromIntegral $ length ns)
-
 -- IO helper. 
 -- readInt :: IO Int
 -- readInt = readLn
@@ -106,4 +102,5 @@ density gr@(Graph ns es) = Statistic [ dense ]
 -- main :: IO ()
 -- main = do
 --     n <- readInt
---     putStr . (\x -> "\nNumber of edges: "++x++"\n") . show . length . edges $ completeGraph [1..n]
+--     putStr . (\x -> "\nNumber of edges: "++x++"\n") . show . length . 
+--     edges $ completeGraph [1..n]
