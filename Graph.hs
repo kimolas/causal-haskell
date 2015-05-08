@@ -93,7 +93,7 @@ nEdge gr = length $ edges gr
 -- -- Monad-based generation of random nodes and edges, i.e. random graphs.
 -- Include or don't include an edge? 
 pBool :: (RandomGen g) => Double -> Rand g Bool
-pBool p = liftM (\x -> x < p) $ getRandomR ((0,1) :: (Double, Double))
+pBool p = liftM (< p) $ getRandomR ((0,1) :: (Double, Double))
 
 -- Decide over a list of edges. 
 pBools :: (RandomGen g) => Double -> Rand g [Bool]
@@ -101,7 +101,7 @@ pBools p = sequence . repeat $ pBool p
 
 -- Not sure if there's a faster way to do this. 
 byBool :: [Bool] -> [a] -> [a]
-byBool bs xs = [snd zs | zs <- (zip bs xs), fst zs]
+byBool bs xs = [ snd zs | zs <- (zip bs xs), fst zs ]
 
 -- Select elements from a list independently and with equal probability. 
 setEdges :: (RandomGen g) => [a] -> Double -> Rand g [a]
