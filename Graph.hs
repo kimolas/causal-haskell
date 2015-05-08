@@ -4,6 +4,10 @@
 -- Distributed under the MIT License. 
 
 import System.IO
+import System.Random
+import Control.Monad
+import Control.Monad.Random
+import Control.Lens
 import qualified Data.Map as M
 import qualified Data.List as L
 import qualified Numeric.LinearAlgebra as LA
@@ -19,9 +23,6 @@ data Graph a = Graph { nodes :: [a]
                      , edges :: [(a, a)]
                      } deriving (Show, Eq)
 
--- -- Data structure for calculated statistics. 
--- data Statistic a = Statistic { values :: a } deriving (Show, Eq)
-
 -- Data structure for network models. 
 data Model = ERG { parameters :: [Double] } deriving (Show, Eq)
 
@@ -31,10 +32,10 @@ emptyGraph = Graph [] []
 
 -- Makes a complete simple graph from a list of nodes. 
 completeGraph :: (Ord a, Eq a) => [a] -> Graph a
-completeGraph ns = Graph sns (redundant es)
+completeGraph ns = Graph sns es
   where
     sns = L.sort ns
-    es = [ (x, y) | x <- sns, y <- sns , x /= y ]
+    es = completeEdges sns
 
 -- Makes a valid graph object from a list of edges. 
 toGraph :: (Ord a, Eq a) => [(a, a)] -> Graph a
@@ -66,6 +67,10 @@ extractNodes es = L.nub $ L.sort allnodes
   where
     allnodes = (map fst es) ++ (map snd es)
 
+-- The complete set of edges between nodes in a list. Needs to be sped up.
+completeEdges :: (Ord a, Eq a) => [a] -> [(a, a)]
+completeEdges ns = redundant [ (x, y) | x <- ns, y <- ns , x /= y ]
+
 -- Add a set of nodes to a graph using their labels. 
 addNodes :: (Ord a) => Graph a -> [a] -> Graph a
 addNodes (Graph ns es) nns = Graph (L.union ns nns) es
@@ -74,14 +79,8 @@ addNodes (Graph ns es) nns = Graph (L.union ns nns) es
 addEdges :: (Ord a) => Graph a -> [(a, a)] -> Graph a
 addEdges (Graph ns es) ees = Graph ns (L.union es ees)
 
--- -- Creates the adjacency matrix for a graph. 
--- adjacency :: Graph -> Matrix Int
--- adjacency (Graph ns es) = (n >< n) . (\x -> )
---   where
---     n = length ns
---     x = [  | x <-  ]
 
----- Various graph statistics. 
+-- -- Various graph statistics. 
 -- Computes the number of nodes. 
 nNode :: Graph a -> Int
 nNode gr = length $ nodes gr
@@ -90,8 +89,34 @@ nNode gr = length $ nodes gr
 nEdge :: Graph a -> Int
 nEdge gr = length $ edges gr
 
--- -- Counts the number of trianges. 
--- nTriangle :: Graph -> Int
+
+-- -- Monad-based generation of random nodes and edges, i.e. random graphs.
+-- Include or don't include an edge? 
+pBool :: (RandomGen g) => Double -> Rand g Bool
+pBool p = liftM (\x -> x < p) $ getRandomR ((0,1) :: (Double, Double))
+
+-- Decide over a list of edges. 
+pBools :: (RandomGen g) => Double -> Rand g [Bool]
+pBools p = sequence . repeat $ pBool p
+
+-- Not sure if there's a faster way to do this. 
+byBool :: [Bool] -> [a] -> [a]
+byBool bs xs = [snd zs | zs <- (zip bs xs), fst zs]
+
+-- Select elements from a list independently and with equal probability. 
+setEdges :: (RandomGen g) => [a] -> Double -> Rand g [a]
+setEdges xs p = liftM (flip byBool xs) $ pBools p
+
+-- Generate an Erdos-Renyi random graph; n nodes and edge probability p. 
+erdosGen :: (RandomGen g) => Int -> Double -> Rand g (Graph Int)
+erdosGen n p = liftM (Graph ns) $ setEdges (completeEdges ns) p
+  where
+    ns = [1..n]
+
+main = do
+  values <- evalRandIO $ erdosGen 200 0.5
+  -- putStrLn (show values)
+  putStrLn (show . length $ edges values)
 
 
 -- IO helper. 
