@@ -7,7 +7,7 @@ import System.IO
 import System.Random
 import Control.Monad
 import Control.Monad.Random
-import Control.Lens
+-- import Control.Lens
 import qualified Data.Map as M
 import qualified Data.List as L
 import qualified Numeric.LinearAlgebra as LA
@@ -67,9 +67,9 @@ extractNodes es = L.nub $ L.sort allnodes
   where
     allnodes = (map fst es) ++ (map snd es)
 
--- The complete set of edges between nodes in a list. Needs to be sped up.
+-- The complete set of edges between nodes in a list. 
 completeEdges :: (Ord a, Eq a) => [a] -> [(a, a)]
-completeEdges ns = redundant [ (x, y) | x <- ns, y <- ns , x /= y ]
+completeEdges ns = [ (x, y) | x <- ns, y <- ns, x < y ]
 
 -- Add a set of nodes to a graph using their labels. 
 addNodes :: (Ord a) => Graph a -> [a] -> Graph a
@@ -114,7 +114,7 @@ erdosGen n p = liftM (Graph ns) $ setEdges (completeEdges ns) p
     ns = [1..n]
 
 main = do
-  values <- evalRandIO $ erdosGen 200 0.5
+  values <- evalRandIO $ erdosGen 1000 0.5
   -- putStrLn (show values)
   putStrLn (show . length $ edges values)
 
