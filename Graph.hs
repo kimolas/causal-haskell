@@ -91,30 +91,36 @@ nEdge gr = length $ edges gr
 
 
 -- -- Monad-based generation of random nodes and edges, i.e. random graphs.
+-- Erdos-Renyi Model
 -- Include or don't include an edge? 
 pBool :: (RandomGen g) => Double -> Rand g Bool
 pBool p = liftM (< p) $ getRandomR ((0,1) :: (Double, Double))
 
 -- Decide over a list of edges. 
-pBools :: (RandomGen g) => Double -> Rand g [Bool]
-pBools p = sequence . repeat $ pBool p
+pBools :: (RandomGen g) => [Double] -> Rand g [Bool]
+pBools ps = sequence $ map pBool ps
 
 -- Not sure if there's a faster way to do this. 
 byBool :: [Bool] -> [a] -> [a]
 byBool bs xs = [ snd zs | zs <- (zip bs xs), fst zs ]
 
 -- Select elements from a list independently and with equal probability. 
-setEdges :: (RandomGen g) => [a] -> Double -> Rand g [a]
-setEdges xs p = liftM (flip byBool xs) $ pBools p
+setEdges :: (RandomGen g) => [a] -> [Double] -> Rand g [a]
+setEdges xs ps = liftM (flip byBool xs) $ pBools ps
 
--- Generate an Erdos-Renyi random graph; n nodes and edge probability p. 
-erdosGen :: (RandomGen g) => Int -> Double -> Rand g (Graph Int)
-erdosGen n p = liftM (Graph ns) $ setEdges (completeEdges ns) p
+-- Generate an Erdos-Renyi random graph; n nodes and edge probabilities ps. 
+erdosGen :: (RandomGen g) => Int -> [Double] -> Rand g (Graph Int)
+erdosGen n ps = liftM (Graph ns) $ setEdges (completeEdges ns) ps
   where
     ns = [1..n]
 
+-- Graphon Model
+-- graphonGen :: (RandomGen g) => (a -> b) -> Rand g (Graph Int)
+-- graphonGen w = pBool 
+
+
 main = do
-  values <- evalRandIO $ erdosGen 1000 0.5
+  values <- evalRandIO . erdosGen 10 $ repeat 0.5
   -- putStrLn (show values)
   putStrLn (show . length $ edges values)
 
