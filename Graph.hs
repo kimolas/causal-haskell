@@ -127,9 +127,9 @@ graphonGen ns w = liftM (Graph ns) es
 
 sblock :: Double -> Double -> Double
 sblock x y
-  | x < 0.5 && y < 0.5 = 1
-  | x < 0.5 || y < 0.5 = 0
-  | otherwise          = 0
+  | x < 0.5 && y < 0.5 = 0.9
+  | x < 0.5 || y < 0.5 = 0.1
+  | otherwise          = 0.5
 
 main = do
   -- values <- evalRandIO . erdosGen [1..100] $ repeat 1
