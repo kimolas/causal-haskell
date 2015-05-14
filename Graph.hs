@@ -6,12 +6,12 @@
 import System.IO
 import System.Random
 import Control.Monad
-import Control.Monad.Random
 -- import Control.Lens
+import Control.Monad.Random
+import qualified System.Random as R
 import qualified Data.Map as M
 import qualified Data.List as L
-import qualified Numeric.LinearAlgebra as LA
-import qualified System.Random as R
+-- import qualified Numeric.LinearAlgebra as LA
 
 -- Some examples of graphs. 
 gr1 = Graph [1..3] [(1,2), (2,1), (1,3)]
@@ -94,33 +94,38 @@ nEdge gr = length $ edges gr
 -- Erdos-Renyi Model
 -- Include or don't include an edge? 
 pBool :: (RandomGen g) => Double -> Rand g Bool
-pBool p = liftM (< p) $ getRandomR ((0,1) :: (Double, Double))
+pBool p = liftM (< p) $ getRandomR ((0, 1) :: (Double, Double))
 
 -- Decide over a list of edges. 
 pBools :: (RandomGen g) => [Double] -> Rand g [Bool]
 pBools ps = sequence $ map pBool ps
 
--- Not sure if there's a faster way to do this. 
+-- Given a list of Bools and any other list, return the list subsetted by
+-- the list of Bools. 
 byBool :: [Bool] -> [a] -> [a]
 byBool bs xs = [ snd zs | zs <- (zip bs xs), fst zs ]
 
--- Select elements from a list independently and with equal probability. 
+-- Select elements from a list independently and with probabilities ps. 
 setEdges :: (RandomGen g) => [a] -> [Double] -> Rand g [a]
 setEdges xs ps = liftM (flip byBool xs) $ pBools ps
 
--- Generate an Erdos-Renyi random graph; n nodes and edge probabilities ps. 
-erdosGen :: (RandomGen g) => Int -> [Double] -> Rand g (Graph Int)
-erdosGen n ps = liftM (Graph ns) $ setEdges (completeEdges ns) ps
+-- Generate an Erdos-Renyi random graph; nodes ns, and edge probabilities
+-- ps. 
+erdosGen :: (Ord a, RandomGen g) => [a] -> [Double] -> Rand g (Graph a)
+erdosGen ns ps = liftM (Graph ns) $ setEdges (completeEdges ns) ps
+
+-- Graphon Model: generates a w-random graph. 
+graphonGen :: (Ord a, RandomGen g) => [a] -> (Double -> Double -> Double) -> Rand
+  g (Graph a)
+graphonGen ns w = liftM (Graph ns) es
   where
-    ns = [1..n]
-
--- Graphon Model
--- graphonGen :: (RandomGen g) => (a -> b) -> Rand g (Graph Int)
--- graphonGen w = pBool 
-
+    n = length ns
+    us = replicate n $ getRandomR ((0, 1) :: (Double, Double))
+    ps = sequence [ liftM2 w x y | x <- us, y <- us ]
+    es = (=<<) (setEdges $ completeEdges ns) ps
 
 main = do
-  values <- evalRandIO . erdosGen 10 $ repeat 0.5
+  values <- evalRandIO . erdosGen [1..100] $ repeat 1
   -- putStrLn (show values)
   putStrLn (show . length $ edges values)
 
