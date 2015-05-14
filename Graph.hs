@@ -121,12 +121,20 @@ graphonGen ns w = liftM (Graph ns) es
   where
     n = length ns
     us = replicate n $ getRandomR ((0, 1) :: (Double, Double))
-    ps = sequence [ liftM2 w x y | x <- us, y <- us ]
+    ps = sequence [ liftM2 w (fst x) (fst y) | x <- (zip us [1..]), y <-
+      (zip us [1..]), snd x < snd y]
     es = (setEdges $ completeEdges ns) =<< ps
+
+sblock :: Double -> Double -> Double
+sblock x y
+  | x < 0.5 && y < 0.5 = 1
+  | x < 0.5 || y < 0.5 = 0
+  | otherwise          = 0
 
 main = do
   -- values <- evalRandIO . erdosGen [1..100] $ repeat 1
-  values <- evalRandIO $ graphonGen [1..100] (\x y -> 0.5)
+  -- values <- evalRandIO $ graphonGen [1..300] (\x y -> (x+y)/2)
+  values <- evalRandIO $ graphonGen [1..5] sblock
   putStrLn (show values)
   putStrLn (show . length $ edges values)
 
