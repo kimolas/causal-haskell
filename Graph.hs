@@ -115,18 +115,19 @@ erdosGen :: (Ord a, RandomGen g) => [a] -> [Double] -> Rand g (Graph a)
 erdosGen ns ps = liftM (Graph ns) $ setEdges (completeEdges ns) ps
 
 -- Graphon Model: generates a w-random graph. 
-graphonGen :: (Ord a, RandomGen g) => [a] -> (Double -> Double -> Double) -> Rand
-  g (Graph a)
+graphonGen :: (Ord a, RandomGen g) => [a] -> (Double -> Double -> Double)
+  -> Rand g (Graph a)
 graphonGen ns w = liftM (Graph ns) es
   where
     n = length ns
     us = replicate n $ getRandomR ((0, 1) :: (Double, Double))
     ps = sequence [ liftM2 w x y | x <- us, y <- us ]
-    es = (=<<) (setEdges $ completeEdges ns) ps
+    es = (setEdges $ completeEdges ns) =<< ps
 
 main = do
-  values <- evalRandIO . erdosGen [1..100] $ repeat 1
-  -- putStrLn (show values)
+  -- values <- evalRandIO . erdosGen [1..100] $ repeat 1
+  values <- evalRandIO $ graphonGen [1..100] (\x y -> 0.5)
+  putStrLn (show values)
   putStrLn (show . length $ edges values)
 
 
