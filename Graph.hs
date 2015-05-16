@@ -119,11 +119,14 @@ graphonGen :: (Ord a, RandomGen g) => [a] -> (Double -> Double -> Double)
   -> Rand g (Graph a)
 graphonGen ns w = liftM (Graph ns) es
   where
-    n = length ns
-    us = replicate n $ getRandomR ((0, 1) :: (Double, Double))
-    ps = sequence [ liftM2 w (fst x) (fst y) | x <- (zip us [1..]), y <-
-      (zip us [1..]), snd x < snd y ]
-    es = (setEdges $ completeEdges ns) =<< ps
+    us = liftM (take (length ns)) $ getRandomRs ((0, 1) :: (Double, Double))
+    es = (liftM (applyUpper w) us) >>= (setEdges (completeEdges ns))
+
+-- Apply a function to the upper triangle of an array. 
+applyUpper :: (a -> a -> b) -> [a] -> [b]
+applyUpper f xs = [ f (fst x) (fst y) | x <- zl, y <- zl, snd x < snd y ]
+  where
+    zl = zip xs ([1..] :: [Int])
 
 sblock :: Double -> Double -> Double
 sblock x y
@@ -132,9 +135,10 @@ sblock x y
   | otherwise          = 0.5
 
 main = do
-  -- values <- evalRandIO . erdosGen [1..100] $ repeat 1
-  -- values <- evalRandIO $ graphonGen [1..300] (\x y -> (x+y)/2)
-  values <- evalRandIO $ graphonGen [1..1000] sblock
+  -- values <- evalRandIO . erdosGen [1..1000] $ replicate 499500 0.5
+  -- values <- evalRandIO $ graphonGen [1..1000] (\x y -> 0.5)
+  values <- evalRandIO $ graphonGen [1..1000] (\x y -> (x+y)/2)
+  -- values <- evalRandIO $ graphonGen [1..1000] sblock
   -- putStrLn (show values)
   putStrLn (show . length $ edges values)
 
