@@ -128,6 +128,11 @@ applyUpper f xs = [ f (fst x) (fst y) | x <- zl, y <- zl, snd x < snd y ]
   where
     zl = zip xs ([1..] :: [Int])
 
+-- Apply a function to the upper triangle of an array. 
+applyUpper' :: (a -> a -> b) -> [a] -> [b]
+applyUpper' f xs = L.foldl' (++) [] [ [ f (fst y) x | x <- drop (snd y) xs
+                                 ] | y <- zip xs ([1..] :: [Int]) ]
+
 sblock :: Double -> Double -> Double
 sblock x y
   | x < 0.5 && y < 0.5 = 0.9
