@@ -129,9 +129,9 @@ applyUpper f xs = [ f (fst x) (fst y) | x <- zl, y <- zl, snd x < snd y ]
     zl = zip xs ([1..] :: [Int])
 
 -- Apply a function to the upper triangle of an array. 
-applyUpper' :: (a -> a -> b) -> [a] -> [b]
-applyUpper' f xs = L.foldl' (++) [] [ [ f (fst y) x | x <- drop (snd y) xs
-                                 ] | y <- zip xs ([1..] :: [Int]) ]
+-- applyUpper' :: (a -> a -> b) -> [a] -> [b]
+-- applyUpper' f xs = L.foldl' (++) [] [ [ f (fst y) x | x <- drop (snd y) xs
+--                                  ] | y <- zip xs ([1..] :: [Int]) ]
 
 sblock :: Double -> Double -> Double
 sblock x y
@@ -141,9 +141,8 @@ sblock x y
 
 main = do
   -- values <- evalRandIO . erdosGen [1..1000] $ replicate 499500 0.5
-  -- values <- evalRandIO $ graphonGen [1..1000] (\x y -> 0.5)
   values <- evalRandIO $ graphonGen [1..1000] (\x y -> (x+y)/2)
-  -- values <- evalRandIO $ graphonGen [1..1000] sblock
+  -- values <- evalRandIO $ graphonGen ['a'..'z'] sblock
   -- putStrLn (show values)
   putStrLn (show . length $ edges values)
 
