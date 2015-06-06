@@ -3,6 +3,8 @@
 -- Department of Statistics, Carnegie Mellon University 
 -- Distributed under the MIT License. 
 
+module Graphs where
+
 import System.IO
 import System.Random
 import Control.Monad
@@ -67,9 +69,16 @@ extractNodes es = L.nub $ L.sort allnodes
   where
     allnodes = (map fst es) ++ (map snd es)
 
--- The complete set of edges between nodes in a list. 
-completeEdges :: (Ord a, Eq a) => [a] -> [(a, a)]
+-- The complete set of edges between nodes in a list. 13.27s
+completeEdges :: (Ord a) => [a] -> [(a, a)]
 completeEdges ns = [ (x, y) | x <- ns, y <- ns, x < y ]
+
+-- The complete set of edges between nodes in a list. Nodes don't need to
+-- be orderable. 22s
+completeEdges' :: [a] -> [(a, a)]
+completeEdges' ns = [ (fst x, fst y) | x <- zs, y <- zs, snd x < snd y ]
+  where
+    zs = zip ns [1..]
 
 -- Add a set of nodes to a graph using their labels. 
 addNodes :: (Ord a) => Graph a -> [a] -> Graph a
@@ -145,7 +154,6 @@ main = do
   -- values <- evalRandIO $ graphonGen ['a'..'z'] sblock
   -- putStrLn (show values)
   putStrLn (show . length $ edges values)
-
 
 -- IO helper. 
 -- readInt :: IO Int
