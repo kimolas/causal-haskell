@@ -7,12 +7,15 @@ module Graphs where
 
 import System.IO
 import System.Random
+
 import Control.Monad
--- import Control.Lens
 import Control.Monad.Random
-import qualified System.Random as R
+import Control.Parallel (par, pseq)
+-- import Control.Lens
+
 import qualified Data.Map as M
 import qualified Data.List as L
+
 -- import qualified Numeric.LinearAlgebra as LA
 
 -- Some examples of graphs. 
@@ -26,7 +29,7 @@ data Graph a = Graph { nodes :: [a]
                      } deriving (Show, Eq)
 
 -- Data structure for network models. 
-data Model = ERG { parameters :: [Double] } deriving (Show, Eq)
+-- data Model = ERG { parameters :: [Double] } deriving (Show, Eq)
 
 -- Makes an empty graph. 
 emptyGraph :: Graph a
@@ -131,6 +134,17 @@ graphonGen ns w = liftM (Graph ns) es
     us = liftM (take (length ns)) $ getRandomRs ((0, 1) :: (Double, Double))
     es = (liftM (applyUpper w) us) >>= (setEdges (completeEdges ns))
 
+-- Graphon Model: generates a w-random graph. Parallel. 
+graphonGen' :: (Ord a, RandomGen g) => [a] -> (Double -> Double -> Double)
+  -> Rand g (Graph a)
+graphonGen' ns w = liftM2 pseq (liftM2 par (liftM force es) (liftM force es')) (liftM (Graph ns) (liftM2 (++) es es'))
+  where
+    us = liftM (take (length ns)) $ getRandomRs ((0, 1) :: (Double, Double))
+    cs = completeEdges ns
+    cshalf = splitAt ((length cs + 1) `div` 2) cs
+    es = (liftM (applyUpper w) us) >>= (setEdges (fst cshalf))
+    es' = (liftM (applyUpper w) us) >>= (setEdges (snd cshalf))
+
 -- Apply a function to the upper triangle of an array. 
 applyUpper :: (a -> a -> b) -> [a] -> [b]
 applyUpper f xs = [ f (fst x) (fst y) | x <- zl, y <- zl, snd x < snd y ]
@@ -154,6 +168,13 @@ main = do
   -- values <- evalRandIO $ graphonGen ['a'..'z'] sblock
   -- putStrLn (show values)
   putStrLn (show . length $ edges values)
+
+
+force :: [a] -> ()
+force xs = go xs `pseq` ()
+  where go (_:xs) = go xs
+        go [] = 1
+
 
 -- IO helper. 
 -- readInt :: IO Int
