@@ -8,7 +8,7 @@ module Graphs where
 import System.IO
 import System.Random
 
-import Svd
+import Adjacency
 
 import Control.Monad
 import Control.Monad.Random
@@ -24,11 +24,6 @@ import qualified Data.List as L
 gr1 = Graph [1..3] [(1,2), (2,1), (1,3)]
 gr2 = Graph [1..2] [(1,2), (2,1), (1,3)]
 gr3 = completeGraph [1..10] 
-
--- Data structure for graphs and networks. 
-data Graph a = Graph { nodes :: [a]
-                     , edges :: [(a, a)]
-                     } deriving (Show, Eq)
 
 -- Data structure for network models. 
 -- data Model = ERG { parameters :: [Double] } deriving (Show, Eq)
