@@ -8,6 +8,8 @@ module Graphs where
 import System.IO
 import System.Random
 
+import Svd
+
 import Control.Monad
 import Control.Monad.Random
 import Control.Parallel (par, pseq)
@@ -169,7 +171,8 @@ main = do
   -- putStrLn (show values)
   putStrLn (show . length $ edges values)
 
-
+-- From "Real World Haskell". Used in the parallel version of the code for
+-- generating w-random graphs, `graphonGen'`. 
 force :: [a] -> ()
 force xs = go xs `pseq` ()
   where go (_:xs) = go xs
