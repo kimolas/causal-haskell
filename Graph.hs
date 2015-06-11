@@ -3,8 +3,6 @@
 -- Department of Statistics, Carnegie Mellon University 
 -- Distributed under the MIT License. 
 
-module Graphs where
-
 import System.IO
 import System.Random
 
@@ -15,14 +13,14 @@ import Control.Monad.Random
 import Control.Parallel (par, pseq)
 -- import Control.Lens
 
-import qualified Data.Map as M
+-- import qualified Data.Map.Strict as M
 import qualified Data.List as L
 
 -- import qualified Numeric.LinearAlgebra as LA
 
 -- Some examples of graphs. 
-gr1 = Graph [1..3] [(1,2), (2,1), (1,3)]
-gr2 = Graph [1..2] [(1,2), (2,1), (1,3)]
+gr1 = Graph [1..3] [(1,2), (1,3), (2,3)]
+gr2 = Graph [1..2] [(1,2), (1,3), (2,3)]
 gr3 = completeGraph [1..10] 
 
 -- Data structure for network models. 
@@ -138,7 +136,8 @@ graphonGen' ns w = liftM2 pseq (liftM2 par (liftM force es) (liftM force es')) (
   where
     us = liftM (take (length ns)) $ getRandomRs ((0, 1) :: (Double, Double))
     cs = completeEdges ns
-    cshalf = splitAt ((length cs + 1) `div` 2) cs
+    n = length ns
+    cshalf = splitAt (((n * (n-1))+2) `div` 4) cs
     es = (liftM (applyUpper w) us) >>= (setEdges (fst cshalf))
     es' = (liftM (applyUpper w) us) >>= (setEdges (snd cshalf))
 
@@ -159,12 +158,6 @@ sblock x y
   | x < 0.5 || y < 0.5 = 0.1
   | otherwise          = 0.5
 
-main = do
-  -- values <- evalRandIO . erdosGen [1..1000] $ replicate 499500 0.5
-  values <- evalRandIO $ graphonGen [1..1000] (\x y -> (x+y)/2)
-  -- values <- evalRandIO $ graphonGen ['a'..'z'] sblock
-  -- putStrLn (show values)
-  putStrLn (show . length $ edges values)
 
 -- From "Real World Haskell". Used in the parallel version of the code for
 -- generating w-random graphs, `graphonGen'`. 
@@ -173,6 +166,13 @@ force xs = go xs `pseq` ()
   where go (_:xs) = go xs
         go [] = 1
 
+
+main = do
+  -- values <- evalRandIO . erdosGen [1..1000] $ replicate 499500 0.5
+  values <- evalRandIO $ graphonGen [1..1000] (\x y -> (x+y)/2)
+  -- values <- evalRandIO $ graphonGen ['a'..'z'] sblock
+  -- putStrLn (show values)
+  putStrLn (show . length $ edges values)
 
 -- IO helper. 
 -- readInt :: IO Int
