@@ -16,9 +16,9 @@ data Graph' a = Graph' { nodes' :: [a]
                        , edges' :: M.Map a [(a, a)]
                        } deriving (Show, Eq)
 
-data Graph'' = Graph'' { nodes'' :: [Int]
-                       , edges'' :: Matrix Double
-                       } deriving (Show, Eq)
+data Graph'' a = Graph'' { nodes'' :: [a]
+                         , edges'' :: Matrix Double
+                         } deriving (Show, Eq)
 
 -- Converts the edge list to a map structure. Takes up more space, but it's
 -- faster for looking up what else is connected to a particular node. 
@@ -28,31 +28,51 @@ toMap (Graph ns es) = Graph' ns es'
     fInsert o m x = M.insertWith (++) (o x) [x] m
     es' = L.foldl' (fInsert snd) (L.foldl' (fInsert fst) M.empty es) es
 
--- Creates a (fst/snd)-biased dictionary for edges. 
-toMap' :: (Ord a, Eq a) => ((a, a) -> a) -> Graph a -> Graph' a
-toMap' f (Graph ns es) = Graph' ns es'
+-- Converts the edge list to a map structure. Takes up more space, but it's
+-- faster for looking up what else is connected to a particular node. 
+toMap' :: (Ord a, Eq a) => [(a, a)] -> M.Map a [a]
+toMap' es = L.foldl' (fInsert snd fst) (L.foldl' (fInsert fst snd) M.empty es) es
   where
-    fInsert o m x = M.insertWith (++) (o x) [x] m
-    es' = L.foldl' (fInsert f) M.empty es
+    fInsert o o' m x = M.insertWith (++) (o x) [o' x] m
 
--- Converts an edge map to an adjacency matrix structure. 
--- toAdjacency :: Graph' a -> Graph''
--- toAdjacency (Graph' ns es) = Graph'' ns m
+-- -- Creates a (fst/snd)-biased dictionary for edges. 
+-- toMap' :: (Ord a, Eq a) => ((a, a) -> a) -> Graph a -> Graph' a
+-- toMap' f (Graph ns es) = Graph' ns es'
 --   where
---     n = length ns
---     m = (n >< n) . 
+--     fInsert o m x = M.insertWith (++) (o x) [x] m
+--     es' = L.foldl' (fInsert f) M.empty es
+
+-- Converts a graph (edge list) to an adjacency matrix structure. 
+toAdjacency :: (Ord a, Eq a) => Graph a -> Graph'' a
+toAdjacency (Graph ns es) = Graph'' ns m
+  where
+    n = length ns
+    a = concat . map (to01List ns) $ map ((M.!) $ toMap' es) ns
+    m = (n >< n) a
+
+-- Converts a graph (edge list) to an adjacency matrix structure. About 1/3
+-- slower than `toAdjacency`. 
+toAdjacency' :: (Ord a, Eq a) => Graph a -> Graph'' a
+toAdjacency' (Graph ns es) = Graph'' ns m
+  where
+    n = length ns
+    a = M.foldl' (++) [] $ M.map (to01List ns) (toMap' es)
+    m = (n >< n) a
 
 -- Given a list of edges which are all connected to a node, generates
 -- a list of 0's and 1's denoting membership. 
-toList :: (Ord a, Eq a) => [a] -> [(a,a)] -> [a]
-toList (n:ns) es
-  | fst e  = 
-  | snd e  = 
-  | True   = 
+to01List ::  (Eq a) => [a] -> [a] -> [Double]
+to01List ns es = map (boolTo01 . flip elem es) ns
+
+-- Converts False/True to 0/1. 
+boolTo01 :: Bool -> Double
+boolTo01 b
+  | b    = 1
+  | True = 0
 
 -- SVD approximation to a graph (uses k-element SVD of the adjacency
--- matrix). 
-svdGraph :: Int -> Graph'' -> Graph''
+-- matrix). In reality we need the SVD of XY^T, but that will come later. 
+svdGraph :: Int -> Graph'' a -> Graph'' a
 svdGraph k (Graph'' ns es) = Graph'' ns $ compress k es
 
 -- This function was written by Nicolas Favre-Felix. It returns an

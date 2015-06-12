@@ -3,6 +3,8 @@
 -- Department of Statistics, Carnegie Mellon University 
 -- Distributed under the MIT License. 
 
+module Graph where
+
 import System.IO
 import System.Random
 
@@ -19,9 +21,9 @@ import qualified Data.List as L
 -- import qualified Numeric.LinearAlgebra as LA
 
 -- Some examples of graphs. 
-gr1 = Graph [1..3] [(1,2), (1,3), (2,3)]
-gr2 = Graph [1..2] [(1,2), (1,3), (2,3)]
-gr3 = completeGraph [1..10] 
+gr1 = Graph [1..3] [(1,2), (1,3), (2,3)] :: Graph Int
+gr2 = Graph [1..2] [(1,2), (1,3), (2,3)] :: Graph Int
+gr3 = completeGraph [1..10] :: Graph Int
 
 -- Data structure for network models. 
 -- data Model = ERG { parameters :: [Double] } deriving (Show, Eq)
@@ -167,13 +169,13 @@ force xs = go xs `pseq` ()
         go [] = 1
 
 
-main = do
-  -- values <- evalRandIO . erdosGen [1..1000] $ replicate 499500 0.5
-  values <- evalRandIO $ graphonGen [1..1000] (\x y -> (x+y)/2)
-  -- values <- evalRandIO $ graphonGen ['a'..'z'] sblock
-  -- putStrLn (show values)
-  putStrLn (show . length $ edges values)
-
+-- main = do
+--   -- values <- evalRandIO . erdosGen [1..1000] $ replicate 499500 0.5
+--   values <- evalRandIO $ graphonGen [1..1000] (\x y -> (x+y)/2)
+--   -- values <- evalRandIO $ graphonGen ['a'..'z'] sblock
+--   -- putStrLn (show values)
+--   putStrLn (show . length $ edges values)
+-- 
 -- IO helper. 
 -- readInt :: IO Int
 -- readInt = readLn
