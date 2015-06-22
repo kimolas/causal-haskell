@@ -16,6 +16,8 @@ import Control.Parallel (par, pseq)
 -- import qualified Data.Map.Strict as M
 import qualified Data.List as L
 
+import Numeric.LinearAlgebra (dispf)
+
 -- import qualified Numeric.LinearAlgebra as LA
 
 -- Some examples of graphs. 
@@ -24,6 +26,8 @@ gr2 = Graph [1..2] [(1,2), (1,3), (2,3)] :: Graph Int
 gr3 = completeGraph [1..10] :: Graph Int
 gr4 = Graph { nodes = [1..4] , edges = [(1,2), (3,4), (1,4)]} :: Graph Int
 kite = Graph [1..4] [(1,2), (1,3), (2,3), (2,4), (3,4)] :: Graph Int
+wiki = Graph [1..6] [(1,2), (1,5), (2,5), (2,3), (3,4), (4,5), (4,6)] ::
+       Graph Int
 
 -- Data structure for network models. 
 -- data Model = ERG { parameters :: [Double] } deriving (Show, Eq)
@@ -172,8 +176,11 @@ force xs = go xs `pseq` ()
 
 main :: IO ()
 main = do
-    values <- evalRandIO $ graphonGen [1..1000] (\x y -> (x+y)/2)
-    putStrLn . show . svdGraph 30 $ toAdjacency values
+    -- values <- evalRandIO $ graphonGen [1..50] (\x y -> (x+y)/2)
+    values <- evalRandIO $ graphonGen [1..50] (\x y -> 0)
+    -- putStrLn . show . svdGraph 30 $ toAdjacency values
+    -- putStrLn . show . dispf 0 $ laplacian values
+    putStrLn . show $ spanTreeCount values
 
 
 -- main = do

@@ -94,8 +94,8 @@ laplacian gr = (diag $ LA.fromList counts) - (edges'' $ toAdjacency gr)
              $ toMap gr
 
 -- Spanning tree counter; uses Kirchhoff's Theorem. 
-spanTreeCount :: (Ord a, Eq a) => Graph a -> Int
-spanTreeCount gr@(Graph ns es) = round . det . subMatrix (1,1) (n',n')
-                                 $ laplacian gr
+spanTreeCount :: (Ord a, Eq a) => Graph a -> Integer
+spanTreeCount gr@(Graph ns es) = round . det . (takeColumns n' . takeRows
+                                 n') $ laplacian gr
   where
     n' = length ns - 1
