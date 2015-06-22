@@ -42,19 +42,19 @@ toMap' gr@(Graph ns es) = Graph' ns es'
 
 
 -- Converts a graph (edge list) to an adjacency matrix structure. 
-toAdjacency :: (Ord a, Eq a) => Graph a -> Graph'' a
-toAdjacency gr@(Graph ns es) = Graph'' ns m
+toAdjacency :: (Ord a, Eq a) => Graph' a -> Graph'' a
+toAdjacency gr@(Graph' ns es) = Graph'' ns m
   where
     n = length ns
-    m = (n >< n) . concat . map (to01List ns) $ map ((M.!) . edges' $ toMap' gr) ns
+    m = (n >< n) . concat . map (to01List ns) $ map ((M.!) $ edges' gr) ns
 
 -- Converts a graph (edge list) to an adjacency matrix structure. About 1/3
 -- slower than `toAdjacency`. 
-toAdjacency' :: (Ord a, Eq a) => Graph a -> Graph'' a
-toAdjacency' gr@(Graph ns es) = Graph'' ns m
+toAdjacency' :: (Ord a, Eq a) => Graph' a -> Graph'' a
+toAdjacency' gr@(Graph' ns es) = Graph'' ns m
   where
     n = length ns
-    m = (n >< n) . M.foldl' (++) [] $ M.map (to01List ns) (edges' $ toMap' gr)
+    m = (n >< n) . M.foldl' (++) [] $ M.map (to01List ns) (edges' gr)
 
 -- Given a list of edges which are all connected to a node, generates
 -- a list of 0's and 1's denoting membership. 
@@ -83,11 +83,10 @@ compress k m = u_k <> sigma_k <> v_k where
 	v_k = takeRows k $ trans v			-- keep k rows of v
 
 -- Constructs the graph Laplacian. 
-laplacian :: (Ord a, Eq a) => Graph a -> Matrix Double
+laplacian :: (Ord a, Eq a) => Graph' a -> Matrix Double
 laplacian gr = (diag $ LA.fromList counts) - (edges'' $ toAdjacency gr)
   where
-    counts = M.foldl (\x y -> x ++ [fromIntegral $ length y]) [] . edges'
-             $ toMap gr
+    counts = M.foldl (\x y -> x ++ [fromIntegral $ length y]) [] $ edges' gr
 
 -- Spanning tree counter; uses Kirchhoff's Theorem. 
 spanTreeCount :: (Ord a, Eq a) => Graph a -> Integer
