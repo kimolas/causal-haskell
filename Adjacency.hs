@@ -28,7 +28,8 @@ toMap :: (Ord a, Eq a) => Graph a -> Graph' a
 toMap (Graph ns es) = Graph' ns es'
   where
     fInsert o m x = M.insertWith (++) (o x) [x] m
-    es' = L.foldl' (fInsert snd) (L.foldl' (fInsert fst) M.empty es) es
+    iMap = M.fromList $ map (\x -> (x, [])) ns
+    es' = L.foldl' (fInsert snd) (L.foldl' (fInsert fst) iMap es) es
 
 -- Converts the edge list to a map structure. Takes up more space, but it's
 -- faster for looking up what else is connected to a particular node. 
