@@ -24,10 +24,11 @@ import Numeric.LinearAlgebra (dispf)
 gr1 = Graph [1..3] [(1,2), (1,3), (2,3)] :: Graph Int
 gr2 = Graph [1..2] [(1,2), (1,3), (2,3)] :: Graph Int
 gr3 = completeGraph [1..10] :: Graph Int
-gr4 = Graph { nodes = [1..4] , edges = [(1,2), (3,4), (1,4)]} :: Graph Int
+gr4 = Graph [1..4] [(1,2), (3,4), (1,4)] :: Graph Int
 kite = Graph [1..4] [(1,2), (1,3), (2,3), (2,4), (3,4)] :: Graph Int
 wiki = Graph [1..6] [(1,2), (1,5), (2,5), (2,3), (3,4), (4,5), (4,6)] ::
        Graph Int
+gr5 = Graph [1..3] [(1,2)] :: Graph Int
 
 -- Data structure for network models. 
 -- data Model = ERG { parameters :: [Double] } deriving (Show, Eq)
@@ -176,10 +177,9 @@ force xs = go xs `pseq` ()
 
 main :: IO ()
 main = do
-    -- values <- evalRandIO $ graphonGen [1..50] (\x y -> (x+y)/2)
-    values <- evalRandIO $ graphonGen [1..50] (\x y -> 0)
+    values <- evalRandIO $ graphonGen [1..10] (\x y -> (x+y)/2)
     -- putStrLn . show . svdGraph 30 $ toAdjacency values
-    -- putStrLn . show . dispf 0 $ laplacian values
+    putStrLn . show $ laplacian values
     putStrLn . show $ spanTreeCount values
 
 

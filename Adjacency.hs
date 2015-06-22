@@ -15,7 +15,7 @@ data Graph a = Graph { nodes :: [a]
                      } deriving (Show, Eq)
 
 data Graph' a = Graph' { nodes' :: [a]
-                       , edges' :: M.Map a [(a, a)]
+                       , edges' :: M.Map a [a]
                        } deriving (Show, Eq)
 
 data Graph'' a = Graph'' { nodes'' :: [a]
@@ -27,32 +27,24 @@ data Graph'' a = Graph'' { nodes'' :: [a]
 toMap :: (Ord a, Eq a) => Graph a -> Graph' a
 toMap (Graph ns es) = Graph' ns es'
   where
-    fInsert o m x = M.insertWith (++) (o x) [x] m
-    iMap = M.fromList $ map (\x -> (x, [])) ns
-    es' = L.foldl' (fInsert snd) (L.foldl' (fInsert fst) iMap es) es
-
--- Converts the edge list to a map structure. Takes up more space, but it's
--- faster for looking up what else is connected to a particular node. 
-toMap' :: (Ord a, Eq a) => [(a, a)] -> M.Map a [a]
-toMap' es = L.foldl' (fInsert snd fst) (L.foldl' (fInsert fst snd) M.empty
-            es) es
-  where
     fInsert o o' m x = M.insertWith (++) (o x) [o' x] m
+    iMap = M.fromList $ map (\x -> (x, [])) ns
+    es' = L.foldl' (fInsert snd fst) (L.foldl' (fInsert fst snd) iMap es) es
 
 -- Converts a graph (edge list) to an adjacency matrix structure. 
 toAdjacency :: (Ord a, Eq a) => Graph a -> Graph'' a
-toAdjacency (Graph ns es) = Graph'' ns m
+toAdjacency gr@(Graph ns es) = Graph'' ns m
   where
     n = length ns
-    m = (n >< n) . concat . map (to01List ns) $ map ((M.!) $ toMap' es) ns
+    m = (n >< n) . concat . map (to01List ns) $ map ((M.!) . edges' $ toMap gr) ns
 
 -- Converts a graph (edge list) to an adjacency matrix structure. About 1/3
 -- slower than `toAdjacency`. 
-toAdjacency' :: (Ord a, Eq a) => Graph a -> Graph'' a
-toAdjacency' (Graph ns es) = Graph'' ns m
-  where
-    n = length ns
-    m = (n >< n) . M.foldl' (++) [] $ M.map (to01List ns) (toMap' es)
+-- toAdjacency' :: (Ord a, Eq a) => Graph a -> Graph'' a
+-- toAdjacency' gr@(Graph ns es) = Graph'' ns m
+--   where
+--     n = length ns
+--     m = (n >< n) . M.foldl' (++) [] $ M.map (to01List ns) (edges' $ toMap es)
 
 -- Given a list of edges which are all connected to a node, generates
 -- a list of 0's and 1's denoting membership. 
