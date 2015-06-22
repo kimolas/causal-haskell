@@ -38,13 +38,6 @@ toMap' es = L.foldl' (fInsert snd fst) (L.foldl' (fInsert fst snd) M.empty
   where
     fInsert o o' m x = M.insertWith (++) (o x) [o' x] m
 
--- -- Creates a (fst/snd)-biased dictionary for edges. 
--- toMap' :: (Ord a, Eq a) => ((a, a) -> a) -> Graph a -> Graph' a
--- toMap' f (Graph ns es) = Graph' ns es'
---   where
---     fInsert o m x = M.insertWith (++) (o x) [x] m
---     es' = L.foldl' (fInsert f) M.empty es
-
 -- Converts a graph (edge list) to an adjacency matrix structure. 
 toAdjacency :: (Ord a, Eq a) => Graph a -> Graph'' a
 toAdjacency (Graph ns es) = Graph'' ns m
