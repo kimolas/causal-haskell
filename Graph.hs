@@ -3,8 +3,6 @@
 -- Department of Statistics, Carnegie Mellon University 
 -- Distributed under the MIT License. 
 
-module Graph where
-
 import System.IO
 import System.Random
 
@@ -24,6 +22,8 @@ import qualified Data.List as L
 gr1 = Graph [1..3] [(1,2), (1,3), (2,3)] :: Graph Int
 gr2 = Graph [1..2] [(1,2), (1,3), (2,3)] :: Graph Int
 gr3 = completeGraph [1..10] :: Graph Int
+gr4 = Graph { nodes = [1..4] , edges = [(1,2), (3,4), (1,4)]} :: Graph Int
+kite = Graph [1..4] [(1,2), (1,3), (2,3), (2,4), (3,4)] :: Graph Int
 
 -- Data structure for network models. 
 -- data Model = ERG { parameters :: [Double] } deriving (Show, Eq)
@@ -134,7 +134,9 @@ graphonGen ns w = liftM (Graph ns) es
 -- Graphon Model: generates a w-random graph. Parallel. 
 graphonGen' :: (Ord a, RandomGen g) => [a] -> (Double -> Double -> Double)
   -> Rand g (Graph a)
-graphonGen' ns w = liftM2 pseq (liftM2 par (liftM force es) (liftM force es')) (liftM (Graph ns) (liftM2 (++) es es'))
+graphonGen' ns w = liftM2 pseq (liftM2 par (liftM force es) (liftM force
+                               es')) (liftM (Graph ns) (liftM2 (++) es
+                               es'))
   where
     us = liftM (take (length ns)) $ getRandomRs ((0, 1) :: (Double, Double))
     cs = completeEdges ns
@@ -168,6 +170,11 @@ force xs = go xs `pseq` ()
   where go (_:xs) = go xs
         go [] = 1
 
+main :: IO ()
+main = do
+    values <- evalRandIO $ graphonGen [1..1000] (\x y -> (x+y)/2)
+    putStrLn . show . svdGraph 30 $ toAdjacency values
+
 
 -- main = do
 --   -- values <- evalRandIO . erdosGen [1..1000] $ replicate 499500 0.5
@@ -175,7 +182,7 @@ force xs = go xs `pseq` ()
 --   -- values <- evalRandIO $ graphonGen ['a'..'z'] sblock
 --   -- putStrLn (show values)
 --   putStrLn (show . length $ edges values)
--- 
+
 -- IO helper. 
 -- readInt :: IO Int
 -- readInt = readLn

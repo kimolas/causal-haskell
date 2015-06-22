@@ -3,9 +3,11 @@
 
 module Adjacency where
 
-import Numeric.LinearAlgebra
+import Numeric.LinearAlgebra hiding (fromList)
+import qualified Numeric.LinearAlgebra as LA (fromList)
 import qualified Data.Map.Strict as M
 import qualified Data.List as L
+import Data.KMeans
 
 -- Data structure for graphs and networks. Just a list of edges. 
 data Graph a = Graph { nodes :: [a]
@@ -31,7 +33,8 @@ toMap (Graph ns es) = Graph' ns es'
 -- Converts the edge list to a map structure. Takes up more space, but it's
 -- faster for looking up what else is connected to a particular node. 
 toMap' :: (Ord a, Eq a) => [(a, a)] -> M.Map a [a]
-toMap' es = L.foldl' (fInsert snd fst) (L.foldl' (fInsert fst snd) M.empty es) es
+toMap' es = L.foldl' (fInsert snd fst) (L.foldl' (fInsert fst snd) M.empty
+            es) es
   where
     fInsert o o' m x = M.insertWith (++) (o x) [o' x] m
 
@@ -47,8 +50,7 @@ toAdjacency :: (Ord a, Eq a) => Graph a -> Graph'' a
 toAdjacency (Graph ns es) = Graph'' ns m
   where
     n = length ns
-    a = concat . map (to01List ns) $ map ((M.!) $ toMap' es) ns
-    m = (n >< n) a
+    m = (n >< n) . concat . map (to01List ns) $ map ((M.!) $ toMap' es) ns
 
 -- Converts a graph (edge list) to an adjacency matrix structure. About 1/3
 -- slower than `toAdjacency`. 
@@ -56,8 +58,7 @@ toAdjacency' :: (Ord a, Eq a) => Graph a -> Graph'' a
 toAdjacency' (Graph ns es) = Graph'' ns m
   where
     n = length ns
-    a = M.foldl' (++) [] $ M.map (to01List ns) (toMap' es)
-    m = (n >< n) a
+    m = (n >< n) . M.foldl' (++) [] $ M.map (to01List ns) (toMap' es)
 
 -- Given a list of edges which are all connected to a node, generates
 -- a list of 0's and 1's denoting membership. 
@@ -85,3 +86,16 @@ compress k m = u_k <> sigma_k <> v_k where
 	u_k = takeColumns k u				-- keep k columns of U
 	v_k = takeRows k $ trans v			-- keep k rows of v
 
+-- Constructs the graph Laplacian. 
+laplacian :: (Ord a, Eq a) => Graph a -> Matrix Double
+laplacian gr = (diag $ LA.fromList counts) - (edges'' $ toAdjacency gr)
+  where
+    counts = M.foldl (\x y -> x ++ [fromIntegral $ length y]) [] . edges'
+             $ toMap gr
+
+-- Spanning tree counter; uses Kirchhoff's Theorem. 
+spanTreeCount :: (Ord a, Eq a) => Graph a -> Int
+spanTreeCount gr@(Graph ns es) = round . det . subMatrix (1,1) (n',n')
+                                 $ laplacian gr
+  where
+    n' = length ns - 1
