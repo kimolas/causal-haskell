@@ -5,6 +5,7 @@ module Adjacency where
 
 import Numeric.LinearAlgebra hiding (fromList)
 import qualified Numeric.LinearAlgebra as LA (fromList)
+import Numeric.LinearAlgebra.Data
 import qualified Data.Map.Strict as M
 import qualified Data.List as L
 import Data.KMeans
@@ -85,3 +86,10 @@ spanTreeCount gr@(Graph ns es) = round . det . (takeColumns n' . takeRows
                                  n') $ laplacian gr
   where
     n' = length ns - 1
+
+-- spectralCluster performs spectral clustering to estimate group membership. 
+spectralCluster :: (Ord a, Eq a) => Int -> Graph a -> [[[Double]]]
+spectralCluster k gr@(Graph ns es) = kmeans k u
+  where
+    n = length ns
+    u = map toList . drop (n-k) . toColumns . snd . eigSH $ laplacian gr

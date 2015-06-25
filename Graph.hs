@@ -177,10 +177,12 @@ force xs = go xs `pseq` ()
 
 main :: IO ()
 main = do
-    values <- evalRandIO $ graphonGen [1..10] (\x y -> (x+y)/2)
+    -- values <- evalRandIO $ graphonGen [1..10] (\x y -> (x+y)/2)
+    values <- evalRandIO $ graphonGen [1..100] sblock
     -- putStrLn . show . svdGraph 30 $ toAdjacency values
-    putStrLn . show $ laplacian values
-    putStrLn . show $ spanTreeCount values
+    -- putStrLn . show $ laplacian values
+    -- putStrLn . show $ spanTreeCount values
+    putStrLn . show $ spectralCluster 20 values
 
 
 -- main = do
