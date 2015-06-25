@@ -29,6 +29,7 @@ kite = Graph [1..4] [(1,2), (1,3), (2,3), (2,4), (3,4)] :: Graph Int
 wiki = Graph [1..6] [(1,2), (1,5), (2,5), (2,3), (3,4), (4,5), (4,6)] ::
        Graph Int
 gr5 = Graph [1..3] [(1,2)] :: Graph Int
+disconnected = Graph [1..4] [(1,2), (3,4)] :: Graph Int
 
 -- Data structure for network models. 
 -- data Model = ERG { parameters :: [Double] } deriving (Show, Eq)
@@ -164,8 +165,15 @@ applyUpper f xs = [ f (fst x) (fst y) | x <- zl, y <- zl, snd x < snd y ]
 sblock :: Double -> Double -> Double
 sblock x y
   | x < 0.5 && y < 0.5 = 0.9
-  | x < 0.5 || y < 0.5 = 0.1
-  | otherwise          = 0.5
+  | x < 0.5 || y < 0.5 = 0.2
+  | otherwise          = 0.8
+
+sblock' :: Double -> Double -> Double
+sblock' x y
+  | x < 1/3 && y < 1/3 = 0.9
+  | x > 1/3 && y > 1/3 && x < 2/3 && y < 2/3 = 0.8
+  | x > 2/3 && y > 2/3 = 0.7
+  | otherwise = 0.2
 
 
 -- From "Real World Haskell". Used in the parallel version of the code for
@@ -178,27 +186,7 @@ force xs = go xs `pseq` ()
 main :: IO ()
 main = do
     -- values <- evalRandIO $ graphonGen [1..10] (\x y -> (x+y)/2)
-    values <- evalRandIO $ graphonGen [1..100] sblock
-    -- putStrLn . show . svdGraph 30 $ toAdjacency values
+    values <- evalRandIO $ graphonGen [1..200] sblock
     -- putStrLn . show $ laplacian values
     -- putStrLn . show $ spanTreeCount values
-    putStrLn . show $ spectralCluster 20 values
-
-
--- main = do
---   -- values <- evalRandIO . erdosGen [1..1000] $ replicate 499500 0.5
---   values <- evalRandIO $ graphonGen [1..1000] (\x y -> (x+y)/2)
---   -- values <- evalRandIO $ graphonGen ['a'..'z'] sblock
---   -- putStrLn (show values)
---   putStrLn (show . length $ edges values)
-
--- IO helper. 
--- readInt :: IO Int
--- readInt = readLn
-
--- Diagnostics. 
--- main :: IO ()
--- main = do
---     n <- readInt
---     putStr . (\x -> "\nNumber of edges: "++x++"\n") . show . length . 
---     edges $ completeGraph [1..n]
+    putStrLn . show $ spectralCluster' values

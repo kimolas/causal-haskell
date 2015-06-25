@@ -8,6 +8,7 @@ import qualified Numeric.LinearAlgebra as LA (fromList)
 import Numeric.LinearAlgebra.Data
 import qualified Data.Map.Strict as M
 import qualified Data.List as L
+import Data.Ord
 import Data.KMeans
 
 -- Data structure for graphs and networks. Just a list of edges. 
@@ -93,3 +94,21 @@ spectralCluster k gr@(Graph ns es) = kmeans k u
   where
     n = length ns
     u = map toList . drop (n-k) . toColumns . snd . eigSH $ laplacian gr
+
+-- spectralCluster performs spectral clustering to estimate group
+-- membership. Estimates the best choice of k using consecutive
+-- differences of the eigenvalues. 
+-- spectralCluster' :: (Ord a, Eq a) => Graph a -> [[[Double]]]
+-- spectralCluster' gr@(Graph ns es) = kmeans k u
+spectralCluster' :: (Ord a, Eq a) => Graph a -> Int
+spectralCluster' gr@(Graph ns es) = k
+  where
+    n = length ns
+    e = eigSH $ laplacian gr
+    k = (+1) . fst . L.minimumBy (comparing snd) . zip [0..] . reverse
+        . diff . toList $ fst e
+    u = map toList . drop (n-k) . toColumns $ snd e 
+
+-- Consecutive differences. 
+diff :: (Num a) => [a] -> [a]
+diff xs = zipWith (-) (drop 1 xs) xs
