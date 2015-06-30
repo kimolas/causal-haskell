@@ -151,31 +151,6 @@ graphonGen' ns w = liftM2 pseq (liftM2 par (liftM force es) (liftM force
     es = (liftM (applyUpper w) us) >>= (setEdges (fst cshalf))
     es' = (liftM (applyUpper w) us) >>= (setEdges (snd cshalf))
 
--- Apply a function to the upper triangle of an array. 
-applyUpper :: (a -> a -> b) -> [a] -> [b]
-applyUpper f xs = [ f (fst x) (fst y) | x <- zl, y <- zl, snd x < snd y ]
-  where
-    zl = zip xs ([1..] :: [Int])
-
--- Apply a function to the upper triangle of an array. 
--- applyUpper' :: (a -> a -> b) -> [a] -> [b]
--- applyUpper' f xs = L.foldl' (++) [] [ [ f (fst y) x | x <- drop (snd y) xs
---                                  ] | y <- zip xs ([1..] :: [Int]) ]
-
-sblock :: Double -> Double -> Double
-sblock x y
-  | x < 0.5 && y < 0.5 = 0.9
-  | x < 0.5 || y < 0.5 = 0.2
-  | otherwise          = 0.8
-
-sblock' :: Double -> Double -> Double
-sblock' x y
-  | x < 1/3 && y < 1/3 = 0.9
-  | x > 1/3 && y > 1/3 && x < 2/3 && y < 2/3 = 0.8
-  | x > 2/3 && y > 2/3 = 0.7
-  | otherwise = 0.2
-
-
 -- From "Real World Haskell". Used in the parallel version of the code for
 -- generating w-random graphs, `graphonGen'`. 
 force :: [a] -> ()
@@ -183,10 +158,33 @@ force xs = go xs `pseq` ()
   where go (_:xs) = go xs
         go [] = 1
 
+-- Apply a function to the upper triangle of an array. 
+applyUpper :: (a -> a -> b) -> [a] -> [b]
+applyUpper f xs = [ f (fst x) (fst y) | x <- zl, y <- zl, snd x < snd y ]
+  where
+    zl = zip xs ([1..] :: [Int])
+
+sblock :: Double -> Double -> Double
+sblock x y
+  | x < 0.5 && y < 0.5 = 1
+  | x < 0.5 || y < 0.5 = 0
+  | otherwise          = 1
+
+-- Need to create a show instance for this (or rewrite it). 
+round' :: (RealFrac a, RealFrac b, Integral b) => Int -> a -> b
+round' x = (/ 10^x) . round . (* 10^x)
+
 main :: IO ()
 main = do
     -- values <- evalRandIO $ graphonGen [1..10] (\x y -> (x+y)/2)
-    values <- evalRandIO $ graphonGen [1..200] sblock
+    let n = 30 :: Int
+    values <- evalRandIO $ graphonGen [1..n] sblock
+    -- let values = completeGraph [1..n]
     -- putStrLn . show $ laplacian values
-    -- putStrLn . show $ spanTreeCount values
-    putStrLn . show $ spectralCluster' values
+    let spannum = spanTreeCount values
+    putStrLn . (\x -> "Number of spanning trees: " ++ x) $ show spannum
+    -- putStrLn . show $ spectralCluster' values
+    putStrLn . (\x -> "Guess for optimal lambda: " ++ x) . show
+      $ lambdaSelect values
+    -- putStrLn . (\x -> "This is " ++ x ++ "% of the true value." ) . show
+    --   . round' 4 . ((/) $ fromIntegral n^(n-2)) $ fromIntegral spannum
