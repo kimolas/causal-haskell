@@ -70,7 +70,7 @@ svdGraph k (Graph'' ns es) = Graph'' ns $ compress k es
 compress :: Int -> Matrix Double -> Matrix Double
 compress k m = u_k <> sigma_k <> v_k where
 	(u,sigma,v) = svd m			-- get SVD
-	sigma_k = (takeColumns k . takeRows k) $ diag sigma	-- keep k values of Σ
+	sigma_k = takeBoth k $ diag sigma	-- keep k values of Σ
 	u_k = takeColumns k u				-- keep k columns of U
 	v_k = takeRows k $ trans v			-- keep k rows of v
 
@@ -81,10 +81,13 @@ laplacian gr = (diag $ LA.fromList counts) - (edges'' $ toAdjacency gr)
     counts = M.foldl (\x y -> x ++ [fromIntegral $ length y]) [] . edges'
              $ toMap gr
 
+-- A little wrapper to simplify taking the upper submatrix. 
+takeBoth :: (Element t) => Int -> Matrix t -> Matrix t
+takeBoth d = takeColumns d . takeRows d
+
 -- Spanning tree counter; uses Kirchhoff's Theorem. 
 spanTreeCount :: (Ord a, Eq a) => Graph a -> Integer
-spanTreeCount gr@(Graph ns es) = round . det . (takeColumns n' . takeRows
-                                 n') $ laplacian gr
+spanTreeCount gr@(Graph ns es) = round . det . takeBoth n' $ laplacian gr
   where
     n' = length ns - 1
 
