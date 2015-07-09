@@ -7,13 +7,14 @@ import System.IO
 import System.Random
 
 import Adjacency
+import Core
 
 import Control.Monad
 import Control.Monad.Random
 import Control.Parallel (par, pseq)
 -- import Control.Lens
 
--- import qualified Data.Map.Strict as M
+import qualified Data.Map.Strict as M
 import qualified Data.List as L
 
 import Numeric.LinearAlgebra (dispf)
@@ -25,9 +26,10 @@ gr1 = Graph [1..3] [(1,2), (1,3), (2,3)] :: Graph Int
 gr2 = Graph [1..2] [(1,2), (1,3), (2,3)] :: Graph Int
 gr3 = completeGraph [1..10] :: Graph Int
 gr4 = Graph [1..4] [(1,2), (3,4), (1,4)] :: Graph Int
+
 kite = Graph [1..4] [(1,2), (1,3), (2,3), (2,4), (3,4)] :: Graph Int
 wiki = Graph [1..6] [(1,2), (1,5), (2,5), (2,3), (3,4), (4,5), (4,6)] ::
-       Graph Int
+  Graph Int
 gr5 = Graph [1..3] [(1,2)] :: Graph Int
 disconnected = Graph [1..4] [(1,2), (3,4)] :: Graph Int
 
@@ -44,6 +46,13 @@ completeGraph ns = Graph sns es
   where
     sns = L.sort ns
     es = completeEdges sns
+
+-- List of all possible graphs on n nodes. 
+-- allGraphs :: (Ord a, Eq a) => [a] -> [Graph a] -> M.Map [Int] [Graph a]
+-- allGraphs ns = L.foldl' () mapInit [1..n]
+--   where
+--     mapInit = M.fromList [(0, emptyGraph)]
+--     n = (\x -> x*(x-1) `div` 2) $ length ns
 
 -- Makes a valid graph object from a list of edges. 
 toGraph :: (Ord a, Eq a) => [(a, a)] -> Graph a
