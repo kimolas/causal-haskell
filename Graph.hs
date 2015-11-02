@@ -84,10 +84,6 @@ extractNodes es = L.nub $ L.sort allnodes
   where
     allnodes = (map fst es) ++ (map snd es)
 
--- The complete set of edges between nodes in a list. 13.27s
-completeEdges :: (Ord a) => [a] -> [(a, a)]
-completeEdges ns = [ (x, y) | x <- ns, y <- ns, x < y ]
-
 -- The complete set of edges between nodes in a list. Nodes don't need to
 -- be orderable. 22s
 completeEdges' :: [a] -> [(a, a)]
@@ -175,9 +171,9 @@ applyUpper f xs = [ f (fst x) (fst y) | x <- zl, y <- zl, snd x < snd y ]
 
 sblock :: Double -> Double -> Double
 sblock x y
-  | x < 0.5 && y < 0.5 = 1
-  | x < 0.5 || y < 0.5 = 0
-  | otherwise          = 1
+  | x < 0.5 && y < 0.5 = 0.8
+  | x < 0.5 || y < 0.5 = 0.1
+  | otherwise          = 0.6
 
 -- Need to create a show instance for this (or rewrite it). 
 round' :: (RealFrac a, RealFrac b, Integral b) => Int -> a -> b
@@ -186,7 +182,7 @@ round' x = (/ 10^x) . round . (* 10^x)
 main :: IO ()
 main = do
     -- values <- evalRandIO $ graphonGen [1..10] (\x y -> (x+y)/2)
-    let n = 30 :: Int
+    let n = 50 :: Int
     values <- evalRandIO $ graphonGen [1..n] sblock
     -- let values = completeGraph [1..n]
     -- putStrLn . show $ laplacian values
