@@ -72,7 +72,7 @@ compress k m = u_k <> sigma_k <> v_k where
 	(u,sigma,v) = svd m   -- get SVD
 	sigma_k = takeBoth k $ diag sigma	-- keep k values of Σ
 	u_k = takeColumns k u    -- keep k columns of U
-	v_k = takeRows k $ tr' v   -- keep k rows of v
+	v_k = takeRows k $ tr v   -- keep k rows of v
 
 -- Constructs the graph Laplacian. 
 laplacian :: (Ord a, Eq a) => Graph a -> Matrix Double
@@ -96,7 +96,8 @@ spectralCluster :: (Ord a, Eq a) => Int -> Graph a -> [[[Double]]]
 spectralCluster k gr@(Graph ns es) = kmeans k u
   where
     n = length ns
-    u = map toList . drop (n-k) . toColumns . snd . eigSH . sym $ laplacian gr
+    -- u = map toList . drop (n-k) . toColumns . snd . eigSH . sym $ laplacian gr
+    u = map toList . drop (n-k) . toColumns . snd . eigSH $ laplacian gr
 
 -- spectralCluster performs spectral clustering to estimate group
 -- membership. Estimates the best choice of k using consecutive
@@ -105,7 +106,8 @@ spectralCluster' :: (Ord a, Eq a) => Graph a -> [[[Double]]]
 spectralCluster' gr@(Graph ns es) = kmeans k u
   where
     n = length ns
-    e = eigSH . sym $ laplacian gr
+    -- e = eigSH . sym $ laplacian gr
+    e = eigSH $ laplacian gr
     k = (+1) . fst . L.minimumBy (comparing snd) . zip [0..] . reverse
         . diff . toList $ fst e
     u = map toList . drop (n-k) . toColumns $ snd e 
@@ -114,7 +116,8 @@ lambdaSelect :: (Ord a, Eq a) => Graph a -> Int
 lambdaSelect gr@(Graph ns es) = k
   where
     n = length ns
-    e = eigSH . sym $ laplacian gr
+    -- e = eigSH . sym $ laplacian gr
+    e = eigSH $ laplacian gr
     k = (+1) . fst . L.minimumBy (comparing snd) . zip [0..] . reverse
         . diff . toList $ fst e
     u = map toList . drop (n-k) . toColumns $ snd e 
