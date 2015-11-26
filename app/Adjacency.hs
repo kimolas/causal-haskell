@@ -70,7 +70,7 @@ svdGraph k (Graph'' ns es) = Graph'' ns $ compress k es
 compress :: Int -> Matrix Double -> Matrix Double
 compress k m = u_k <> sigma_k <> v_k where
   (u,sigma,v) = svd m  -- get SVD
-  sigma_k = takeBoth k $ diag sigma	-- keep k values of Σ
+  sigma_k = takeBoth k $ diag sigma -- keep k values of Σ
   u_k = takeColumns k u    -- keep k columns of U
   v_k = takeRows k $ tr v   -- keep k rows of v
 
