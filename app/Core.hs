@@ -6,7 +6,7 @@ module Core where
 
 import Adjacency
 import qualified Data.List as L
-import qualified Data.Map.Strict as M
+import qualified Data.Map.Lazy as M
 
 -- The shell distribution of a given graph. 
 -- shell :: (Ord a, Eq a) => Graph' a -> Map a [a]

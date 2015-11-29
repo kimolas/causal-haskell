@@ -8,13 +8,14 @@ import System.Random
 
 import Adjacency
 import Core
+import Local
 
 import Control.Monad
 import Control.Monad.Random
 import Control.Parallel (par, pseq)
 -- import Control.Lens
 
-import qualified Data.Map.Strict as M
+import qualified Data.Map.Lazy as M
 import qualified Data.List as L
 
 import Numeric.LinearAlgebra (dispf)
