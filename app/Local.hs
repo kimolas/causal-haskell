@@ -9,10 +9,8 @@ import qualified Data.Map.Lazy as M
 import Control.Monad
 
 -- Frequencies of local nodes
-freq :: Ord a => Graph' a -> a -> Maybe (M.Map a Int)
-freq gr n = case loc of
-              Just l  -> Just $ L.foldl ins M.empty l
-              Nothing -> Nothing
+freq :: Ord a => a -> Graph' a -> Maybe (M.Map a Int)
+freq n gr = L.foldl ins M.empty <$> loc
   where
     loc = M.lookup n $ edges' gr
     ins m k = M.insertWith (+) k (1 :: Int) m
