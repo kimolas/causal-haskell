@@ -33,6 +33,6 @@ nbhd gr n = flip M.union locmap . flip M.intersection locmap . M.unionsWith (+) 
 longest :: [[a]] -> [a]
 longest = L.maximumBy (\x y -> compare (length x) (length y))
 
--- Infer communities
+-- Infer connectivity of largest community
 -- community :: Ord a => Graph' a -> a -> [[[Double]]]
-community gr n = kmeans 2 . map (\x -> [fromIntegral x]) . M.elems $ nbhd gr n
+community gr n = map fst . longest . kmeansGen (\x -> [fromIntegral $ snd x]) 2 . M.toList $ nbhd gr n
