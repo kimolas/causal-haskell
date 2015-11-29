@@ -19,8 +19,6 @@ freq gr n = L.foldl ins M.empty $ local gr n
   where
     ins m k = M.insertWith (+) k (1 :: Int) m
 
-gr1 = toMap $ Graph [1..7] [(1, 2), (1, 3), (1, 4), (2, 3), (2, 4), (3, 4), (4, 5), (5, 6), (5, 7), (6, 7)]
-
 -- Using folds to create the neighborhood layer. Depends on lazy evaluation
 -- to avoid actually constructing the entire array. 
 nbhd :: Ord a => Graph' a -> a -> M.Map a Int

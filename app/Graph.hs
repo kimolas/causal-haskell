@@ -173,8 +173,8 @@ applyUpper f xs = [ f (fst x) (fst y) | x <- zl, y <- zl, snd x < snd y ]
 sblock :: Double -> Double -> Double
 sblock x y
   | x < 0.5 && y < 0.5 = 0.8
-  | x < 0.5 || y < 0.5 = 0.1
-  | otherwise          = 0.6
+  | x < 0.5 || y < 0.5 = 0.2
+  | otherwise          = 0.8
 
 -- Need to create a show instance for this (or rewrite it). 
 round' :: (RealFrac a, RealFrac b, Integral b) => Int -> a -> b
@@ -183,14 +183,13 @@ round' x = (/ 10^x) . round . (* 10^x)
 main :: IO ()
 main = do
     -- values <- evalRandIO $ graphonGen [1..10] (\x y -> (x+y)/2)
-    let n = 50 :: Int
-    values <- evalRandIO $ graphonGen [1..n] sblock
-    -- let values = completeGraph [1..n]
-    -- putStrLn . show $ laplacian values
-    let spannum = spanTreeCount values
-    putStrLn . (\x -> "Number of spanning trees: " ++ x) $ show spannum
+    let n = 100 :: Int
+    gr <- evalRandIO $ graphonGen [1..n] sblock
+    putStrLn . show . length $ community (toMap gr) 1
+    -- let spannum = spanTreeCount values
+    -- putStrLn . (\x -> "Number of spanning trees: " ++ x) $ show spannum
     -- putStrLn . show $ spectralCluster' values
-    putStrLn . (\x -> "Guess for optimal lambda: " ++ x) . show
-      $ lambdaSelect values
+    -- putStrLn . (\x -> "Guess for optimal lambda: " ++ x) . show
+    --  $ lambdaSelect values
     -- putStrLn . (\x -> "This is " ++ x ++ "% of the true value." ) . show
     --   . round' 4 . ((/) $ fromIntegral n^(n-2)) $ fromIntegral spannum
