@@ -22,9 +22,6 @@ library
 executable new-template-exe
   hs-source-dirs:      app
   main-is:             Graph.hs
-  other-modules:       Adjacency
-                     , Core
-                     , Local
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N
   build-depends:       base
                      , new-template
